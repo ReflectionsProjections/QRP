@@ -3,7 +3,7 @@ QR|P App Proof of Concept
 
 ## For running the...
 ### Reader
-Go into ./reader/serv and type ```node index.ts```. It should say that server is being hosted on localhost:8080
+Go into ./reader/serv and type ```node index.ts```. It should say that server is being hosted on localhost:8080  
 In another terminal, go to /reader/ui and type ```yarn add``` and ```yarn dev```. It should give you a localhost link to click
 ### Generator
 
