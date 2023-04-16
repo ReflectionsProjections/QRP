@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + TS</title>
+  </head>
+  <body>
+    <div>
+      <img id="qrcode"></img>
+    </div>
+    <div>
+      <form id = "qrinfo">
+        <input type = "text" id = "userID" name = "userID" placeholder = "userID">
+        <input type = "text" id = "isStaff" name = "isStaff" placeholder = "isStaff">
+        <input type = "text" id = "location" name = "location" placeholder = "location">
+        <select name = "errlvl">
+          <option value = "L">L 7%</option>
+          <option value = "M">M 15%</option>
+          <option value = "Q">Q 25%</option>
+          <option value = "H">H 30%</option>
+        </select>
+        <input type = "submit" value = "submit">
+      </form>
+      
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+
+<style>
+  html {
+    display:flex;
+    flex-direction:column
+  }
+  img {
+    image-rendering: crisp-edges;
+    width: 400px;
+    height: auto;
+
+  }
+  div {
+    padding: 5vh
+  }
+</style>
