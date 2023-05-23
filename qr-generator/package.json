@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
+    "dev-port": "vite --port 4000 --host",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
