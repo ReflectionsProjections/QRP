@@ -2,26 +2,72 @@
 <html>
   <head>
     <title>JWT Shenanigans</title>
+    <link rel="stylesheet" href="./src/style.css">
+    
+
   </head>
   <body>
-    <h1>UI Design is my passion</h1>
-    <form id="encrypt">
-      <label for="userId">TO Encrypt:</label>
-      <input type="text" id="encryptJSON" name="encryptJSON" required />
-      <button type="submit" id="encrypt_submit">Bazinga</button>
+    <div id="header">
+      <img src="./src/title.png" style="display:flex; scale: 0.4; transform-origin: 0% 0%; margin-bottom: -100px;">
+    </div>
+    
+    <h2 for="encryptForm">JWT Schtuff</h2>
+    <form id="encryptForm">
+      <h3>Encrypt Data:</h3>
+
+      <h4>Data:</h4>
+      <label for="userId">UserID:</label>
+      <input type="text" id="userId" name="userId" required />
+      <br>
+      <label for="date">Time (in Epoch):</label>
+      <input type="text" id="date" name="date" required />
+      <br>
+      
+      <label for="date">Location:</label>
+      <input type="text" id="location" name="location" required />
+      <br>
+      <h4>JWT Options:</h4>
+      <label for="exp">Expiration Time (s, m, h, d): </label>
+      <input type="text" id="exp" name="exp" required />
+
+      <br>
+      <button type="submit" id="to_encrypt_submit">Bazinga</button>
     </form>
-    <div id="encryptresult">result will go here</div>
+    <div id="encrypted_result" style="word-wrap: break-word">Token:</div>
 
-
-    <form id="decrypt">
+    <br>
+    <h3 for="decryptForm">Decrypt Token:</h3>
+    <form id="decryptForm">
       <label for="userId">TO Decrypt:</label>
-      <input type="text" id="decryptJSON" name="decryptJSON" required />
+      <input type="text" id="encrypted_JSON" name="encrypted_JSON" required />
       <button type="submit" id="decrypt_submit">Bazinga</button>
     </form>
-    <div id="decryptresult">result will go here</div>
+    <div id="decrypted_result">Payload:</div>
+    <div id="decrypted_result_iat">Iat Time:</div>
 
+    <div id="decrypted_result_exp">Exp Time:</div>
+    <div id="decrypted_result_validity">Valid:</div>
 
+    <hr>
 
-    <script src="./src/main.ts"></script>
+    <h2>Random Tools</h2>
+
+    <h3>Get current epoch time</h3>
+    <form id="currentTimeForm">
+      <button type="submit" id="currTime">Bazinga</button>
+    </form>
+    <div id="currentTimeResult">Current epoch time (seconds): </div>
+
+    <br>
+
+    <h3>Get epoch time of date time string</h3>
+    <p>Format: MM/dd/yyyy hh:mm:ss</p>
+    <form id="stringToTimeForm">
+      <input type="text" id="inputStr" name="inputStr" required />
+
+      <button type="submit" id="currTime">Bazinga</button>
+    </form>
+    <div id="inputTimeResult">Converted to epoch time (seconds): </div>
   </body>
+  <script src="./src/main.ts"></script>
 </html>

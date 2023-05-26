@@ -9,11 +9,11 @@ export class AppController {
   constructor(private readonly jwtService: JwtService) {}
 
   @Post('encrypt')
-  encryptUser(@Body() body: { encryptJSON: string }): { token: string } {
+  encryptUser(@Body() body: {data: Object, exp: string}): {token: string} {
 
-    console.log("lmaoen:" + body.encryptJSON);
+    
     // console.log(jwtConstants.secret); 
-    const token = this.jwtService.sign({ userId: body.encryptJSON }, {secret: jwtConstants.secret}  );
+    const token = this.jwtService.sign(body.data, {secret: jwtConstants.secret, expiresIn: body.exp }  );
     return { token };
   }
 
@@ -21,10 +21,10 @@ export class AppController {
   decryptUser(@Body() body: {encrypted_token: string} ): { token: string | Object} {
     // console.log("lmao:" + body[0]);
 
-    console.log(body.encrypted_token);
+    // console.log(body.encrypted_token);
     const token = this.jwtService.decode(body.encrypted_token, {complete: true});
-    console.log("app.controller token decrypt")
-    console.log(token);
+    // console.log("app.controller token decrypt")
+    // console.log(token);
     return { token };
   }
 }

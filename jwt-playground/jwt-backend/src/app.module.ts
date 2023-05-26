@@ -7,8 +7,6 @@ import { jwtConstants } from "../constants";
 @Module({
   imports: [
     JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '1h' },
     }),
   ],
   controllers: [AppController],
