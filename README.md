@@ -26,5 +26,5 @@ yarn run start:dev
 In a seperate terminal, go to ./jwt-playground/jwt-frontend. Run:
 ```
 yarn
-yarn run start:dev
+yarn dev
 ```
