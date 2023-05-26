@@ -9,7 +9,7 @@ In another terminal, go to /reader/ui and type ```yarn add``` and ```yarn dev```
 
 Go into ./qr-generator and type ```yarn add```, ```yarn build```, and ```yarn dev```. It should give you a localhost link to click.
 
-###JWT Playground
+### JWT Playground
 Go into ./jwt-playground/jwt-backend. 
 Create ```./constants.ts```. The contents of this file should look like:
 ```
