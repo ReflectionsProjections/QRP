@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <button id="logout-button">Logout</button>
     <title>QR Scanner Demo</title>
 </head>
 <body>
@@ -57,6 +58,7 @@
 <button id="stop-button">Stop</button>
 <hr>
 
+
 <!--<script src="../qr-scanner.umd.min.js"></script>-->
 <!--<script src="../qr-scanner.legacy.min.js"></script>-->
 <script type="module">
@@ -71,7 +73,17 @@
     const flashState = document.getElementById('flash-state');
     const camQrResult = document.getElementById('cam-qr-result');
     const camQrResultTimestamp = document.getElementById('cam-qr-result-timestamp');
-    
+    function logout() {
+  // Remove email and password from local storage
+  localStorage.removeItem('email');
+  localStorage.removeItem('password');
+  
+  // Redirect to the regular localhost
+  window.location.href = "http://localhost:5173";
+}
+
+// Add click event listener to the logout button
+    document.getElementById('logout-button').addEventListener('click', logout);
     let last_scanned = "";
 
     async function setResult(label, result) {
@@ -212,6 +224,17 @@
     #flash-toggle {
         display: none;
     }
+
+    #logout-button {
+            float: right;
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
     hr {
         margin-top: 32px;
