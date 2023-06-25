@@ -1,7 +1,9 @@
 const express = require('express')
 var cors = require('cors')
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken")
 const { Scan } = require("./models");
+
 // Currently, pulling env vars in any form doens't work and I'm not too sure why
 // console.log(process.env.MONGO_URI)
 
@@ -25,8 +27,17 @@ app.get("/scan", async (req, res) => {
 
 
 app.post("/scan", cors(), async (req, res) => {
-  // console.log(req)
-  const newEvent = new Scan({ ...req.body });
+  console.log('hello');
+
+  const token = jwt.decode(req.body.data);
+  console.log(token);
+  const tmp = token.userId;
+
+  console.log("tmp", tmp);
+
+  
+  const newEvent = new Scan({"userId": tmp, "date": new Date(Date.now()).toDateString(), "location": "Siebel"});
+  
   const insertedEvent = await newEvent.save();
   return res.status(201).json(insertedEvent);
 });

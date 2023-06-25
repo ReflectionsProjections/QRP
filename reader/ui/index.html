@@ -84,7 +84,7 @@
                     method: "POST",
                     mode: 'cors',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(JSON.parse(result.data)),
+                    body: JSON.stringify({"data": result.data}),
                 });    
                 console.log('Success:', result.data);
                 console.log("Last scanned value: ", last_scanned);

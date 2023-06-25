@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+    <title>Best App in the World</title>
+  </head>
+  <body class="bg-secondary">
+    <nav id="header" class="navbar navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand">QR|P</a>
+        <div class="d-flex">
+          <button  type="button" class="btn btn-success m-1" data-bs-toggle="modal" data-bs-target="#loginFormDiv">Login</button>
+          <button id="signOut" type="button" class="btn btn-outline-success m-1">Sign out</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="modal fade" id="loginFormDiv" tabindex="-1" aria-labelledby="loginForm" aria-hidden="true">
+      <form class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="loginFormTitle">Super Secure Example Login Form</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="loginForm">            
+              <div class="md-form mb-5">
+                <label for="email">Your email</label>
+                <input placeholder="name@illinois.edu" type="text" id="email" class="form-control validate mt-1">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" id="formSubmit" class="btn btn-success" data-bs-dismiss="modal">Submit</button>
+              </div>
+            </form>
+          </div>
+          <!-- <div class="modal-footer">
+            
+          </div> -->
+        </div>
+      </form>
+    </div>
+
+    
+      
+
+    <!-- <button class = "btn" id="cookieTest">CookieTest</button>  -->
+    
+    <div style="height: 60vh" class="container mt-5">
+      <div class = "row">
+        <p id="qrcodeSubText" class="text-center align-items-center justify-content-center text-end h2 text-light"></p>
+      </div>
+      <div class= "row text-center align-items-center justify-content-center">
+        <img style="image-rendering: crisp-edges;
+        width: 400px;
+        height: auto" id="qrcode"></img>
+      </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    
+    <script type="module" src="/src/main.ts"></script>
+
+
+  </body>
+</html>
+

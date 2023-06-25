@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const ScanEvent = new mongoose.Schema({
-    userID: {
+    userId: {
         type: String,
         required: true,
     },
-    isStaff: {
+    date: {
         type: String,
         required: true,
     },
