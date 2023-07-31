@@ -74,12 +74,30 @@
     
     let last_scanned = "";
 
+    window.addEventListener('DOMContentLoaded', () => {
+      fetch('http://dev.reflectionsprojections.org/api/auth/me')
+    .then(response => {
+      if (response.status === 401) {
+        console.log('Unauthorized. Redirecting to login page...');
+        //window.location.href = './components/login-generate/login-page.html'; // Redirect to the login page
+      } else if (response.ok) {
+        console.log('Response OK');
+      } else {
+        console.log('Response not OK. Redirecting to login page...');
+        window.location.href = 'login.html'; // Redirect to the login page
+      }
+    })
+    .catch(error => {
+      console.error('An error occurred:', error);
+    });
+});
+
     async function setResult(label, result) {
         console.log(result.data);
         if (last_scanned != result.data) {
             last_scanned = result.data;
             await new Promise(r => setTimeout(r, 100));
-            try {
+            /*try {
                 await fetch("http://localhost:8080/scan", {
                     method: "POST",
                     mode: 'cors',
@@ -93,9 +111,28 @@
                 last_scanned = "";
 
                 console.log('Error', e);
+            }*/
+            const id = result.data;
+            const apiURL = "http://dev.reflectionsprojections.org/api/event/${id}/attendee";
+            const registerAttendeeDto = {
+                id: id
             }
-        } else {
-            console.info("QR Code has just been scanned or is currently processing");
+            const requestOptions = {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringfy(registerAttendeeDto)
+
+            }
+
+            fetch(apiURL, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error', error);
+            });
+
         }
         
         label.textContent = result.data;
