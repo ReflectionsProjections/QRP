@@ -1,38 +1,53 @@
-# create-svelte
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://avatars.githubusercontent.com/u/25068122?s=200&v=4" width="100" alt="RP Logo" /></a>
+</p>
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+# QR|P 
 
-## Creating a project
+QR Pass Scanner for Reflections | Projections 2023, powered by SvelteKit + Tailwind + html5-qrcode
 
-If you're seeing this, you've probably already done this step. Congrats!
+## About
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+QR|P is the staff facing portion of RP Infrastructure for 2023. It includes web-app based scanning functionality.
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+### Tenets
 
-## Developing
+We strive to keep these at the forefront of planning & implementation for this project:
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- Accessible
+- Blazing Fast
+- Simple
+- Tolerant
 
-```bash
-npm run dev
+## Installation
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+- Clone this repository
 
-## Building
-
-To create a production version of your app:
+- Install dependencies
 
 ```bash
-npm run build
+$ yarn
 ```
 
-You can preview the production build with `npm run preview`.
+## Running the app
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+```bash
+# development
+$ yarn dev --open
+
+# production mode
+$ yarn build
+$ yarn serve
+```
+
+## Test
+
+Support for comprehensive testing via Playwright is planned.
+
+## Support
+
+Create a GitHub issue to for any bug reports or other requests
+
+## License
+
+QR|P is proprietary, closed source software as of June 2023.
