@@ -1,0 +1,3 @@
+import { writable } from "svelte/store";
+
+export const scannerActive = writable<boolean>(false);
