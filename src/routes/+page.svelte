@@ -2,72 +2,59 @@
 	import QRScanner from '$lib/components/QRScanner.svelte';
 	import { scannerActive } from '$lib/stores';
 	import { onMount } from 'svelte';
+	import { API_URL } from '../constants';
+	import { goto } from '$app/navigation';
 
-	let email_manual = '';
+	let emailInput = '';
+	const scannedEmails = [];
 
 	const submitEmail = () => {
-		// Store the entered email in the email_manual variable
-		alert('Email Submitted');
-		console.log('Entered Email:', email_manual);
-		email_manual = '';
+		console.log('Entered Email:', emailInput);
+		emailInput = '';
 	};
 
 	onMount(async () => {
-		fetch('http://localhost:3000/auth/me', {
-			method: 'GET', // or 'POST', 'PUT', etc.
-			headers: {
-				'Content-Type': 'application/json'
-				// Other headers...
-			},
-			credentials: 'include'
-		}) // Add this line to include credentials)
-			.then((response) => {
-				if (response.status === 401) {
-					console.log('Unauthorized. Redirecting to login page...');
-					window.location.href = 'https://reflectionsprojections.org/login';
-					//navigate("/login-generate")
-					//window.location.href = './components/login-generate/login-page.svelte'; // Redirect to the login page
-				} else if (response.ok) {
-					console.log('Response OK');
-				} else {
-					console.log('Response not OK. Redirecting to login page...');
-					//navigate("/login-generate") // Redirect to the login page
-				}
-			})
-			.catch((error) => {
-				console.error('An error occurred:', error);
-			});
+		const response = await fetch(`${$API_URL}/access/admin`, {
+			credentials: 'include',
+			cache: 'no-cache'
+		});
+		if (!response.ok) {
+			console.error(response.status, response.body);
+			throw new Error('Something went wrong!');
+		}
+
+		if (response.status === 401) {
+			console.log('Unauthorized. Redirecting to login page...');
+			window.location.href = 'https://reflectionsprojections.org/login';
+		} else {
+			goto('/');
+		}
 	});
 
 	const toggleScanner = () => {
 		scannerActive.set(!$scannerActive);
 	};
 
-	let last_scanned = '';
+	let last_scanned: string | null = null;
 
 	const successCallback = (decodedText: string) => {
-		// TODO: Call RP-core API
-		// fetch('/scanevent')
+		// == PLEASE READ ==
+		// It CANNOT be decrypted client-side (in QRP), only in rp-core!
+		// Currently looked into this and found our that the rp-core endpoint currently does not support this.
+		// Will add the following endpoints:
+		// PUT /events/:eventId/attendee/email
+		//    --> body: { email: "attendee@email.com" }
+		// PUT /events/:eventId/attendance/qr
+		//    --> body: { token: decodedText }
 		console.log(decodedText);
 		if (last_scanned != decodedText) {
-			/*try {
-                  await fetch("http://localhost:8080/scan", {
-                      method: "POST",
-                      mode: 'cors',
-                      headers: {'Content-Type': 'application/json'},
-                      body: JSON.stringify({"data": result.data}),
-                  });    
-                  console.log('Success:', result.data);
-                  console.log("Last scanned value: ", last_scanned);
-              } catch (e) {
-                  console.error("QR Code data is bad or cannot be scanned");
-                  last_scanned = "";
-  
-                  console.log('Error', e);
-              }*/
 			console.log('decoded id:' + decodedText);
 			const id = decodedText;
-			const apiURL = 'http://localhost:3000/events/' + id + '/attendee';
+			// == PLEASE READ ==
+			// Note: This fetch call is wrong because the id refers to event id.
+			// You'l need to fetch a list of events from GET /events and add a dropdown selector in QRP
+			// to select a particular event.
+			const apiURL = `${$API_URL}/events/${id}/attendee`;
 			const registerAttendeeDto = {
 				id: id
 			};
@@ -96,35 +83,29 @@
 	<button on:click={toggleScanner} class="bg-pink-500 rounded-md p-3 text-white">
 		{$scannerActive ? 'Stop Scanning' : 'Start Scanning'}
 	</button>
-</div>
-<br />
-{#if last_scanned !== ''}
-	<div class="m-3 pl-10">
-		<label for="last-scanned" class="text-lg font-semibold">Last Scanned ID:</label>
-		<div class="shadow-box">
-			<span class="text-xl">{last_scanned}</span>
+
+	<div class="flex flex-col">
+		{#if last_scanned}
+			<div class="m-3 pl-10">
+				<div class="text-lg font-semibold">Last Scanned ID:</div>
+				<div class="shadow-box">
+					<span class="text-xl">{last_scanned}</span>
+				</div>
+			</div>
+		{/if}
+		<div class="m-3 pl-10">
+			<label for="email" class="text-lg font-semibold">Enter Email:</label>
+			<div class="flex gap-2">
+				<input
+					type="email"
+					id="email"
+					class="border border-gray-300 p-2 rounded-md shadow-md"
+					bind:value={emailInput}
+				/>
+				<button class="bg-pink-500 rounded-md p-3 text-white" on:click={submitEmail}>
+					Submit
+				</button>
+			</div>
 		</div>
 	</div>
-{/if}
-<div class="m-3 pl-10">
-	<label for="email" class="text-lg font-semibold">Enter Email:</label>
-	<div class="flex gap-2">
-		<input
-			type="email"
-			class="border border-gray-300 p-2 rounded-md shadow-md"
-			bind:value={email_manual}
-		/>
-		<button class="bg-pink-500 rounded-md p-3 text-white" on:click={submitEmail}> Submit </button>
-	</div>
 </div>
-
-<style>
-	/* Additional styling */
-	.shadow-box {
-		background-color: #f7fafc; /* Set your preferred background color */
-		box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Adjust shadow settings */
-		width: 30vw; /* 10% of viewport width */
-		padding: 10px; /* Adjust padding as needed */
-		border-radius: 5px; /* Adjust border radius as needed */
-	}
-</style>
