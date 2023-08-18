@@ -4,17 +4,48 @@
 	import { onMount } from 'svelte';
 	import { API_URL } from '../constants';
 	import { goto } from '$app/navigation';
+	import { writable } from 'svelte/store';
 
 	let emailInput = '';
 	const scannedEmails = [];
+	let selectedEventId = 0;
+	const eventOptions = writable<EventData[]>([]);
+
+	interface EventData {
+		_id: string;
+		name: string;
+	}
 
 	const submitEmail = () => {
-		console.log('Entered Email:', emailInput);
-		emailInput = '';
-	};
+    if (selectedEventId) {
+        const apiURL = `${$API_URL}/events/${selectedEventId}/attendee/email`;
+        const requestBody = {
+            email: emailInput
+        };
+        
+
+        fetch(apiURL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(requestBody),
+			credentials: 'include'
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                emailInput = ''; // Clear the input after successful submission
+                console.log('Email submitted successfully!');
+            })
+            .catch(error => {
+                console.error('Error', error);
+            });
+    } else {
+        console.log('Please select an event before submitting the email.');
+    }
+};
 
 	onMount(async () => {
-		const response = await fetch(`${$API_URL}/access/admin`, {
+		const response = await fetch(`${$API_URL}/auth/access/admin`, {
 			credentials: 'include',
 			cache: 'no-cache'
 		});
@@ -28,6 +59,15 @@
 			window.location.href = 'https://reflectionsprojections.org/login';
 		} else {
 			goto('/');
+		}
+
+		const eventsResponse = await fetch(`${$API_URL}/events`);
+		if (eventsResponse.ok) {
+			const eventsData: EventData[] = await eventsResponse.json();
+			eventOptions.set(eventsData);
+		} else {
+			console.error(eventsResponse.status, eventsResponse.body);
+			throw new Error('Failed to fetch events.');
 		}
 	});
 
@@ -54,17 +94,17 @@
 			// Note: This fetch call is wrong because the id refers to event id.
 			// You'l need to fetch a list of events from GET /events and add a dropdown selector in QRP
 			// to select a particular event.
-			const apiURL = `${$API_URL}/events/${id}/attendee`;
+			const apiURL = `${$API_URL}/events/${selectedEventId}/attendance/qr`;
 			const registerAttendeeDto = {
 				id: id
 			};
-			const requestOptions = {
+
+			fetch(apiURL, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(registerAttendeeDto)
-			};
-
-			fetch(apiURL, requestOptions)
+				body: JSON.stringify(registerAttendeeDto),
+				credentials: 'include'
+		})
 				.then((response) => response.json())
 				.then((data) => {
 					console.log(data);
@@ -78,7 +118,24 @@
 	};
 </script>
 
+
+<div>
+<br>
+<div class="m-3 pl-10">
+	<label for="event" class="text-lg font-semibold">Select Event:</label>
+	<select
+    id="event"
+    class="border border-gray-300 p-2 rounded-md shadow-md"
+    bind:value={selectedEventId}> <!-- Bind selectedEventId to the dropdown value -->
+    <option value="" selected>Select</option> <!-- Initial text "Select" -->
+    {#each $eventOptions as event (event._id)}
+        <option value={event._id}>{event.name}</option>
+    {/each}
+</select>
+	<label></label>
+</div>
 <div class="flex flex-col md:flex-row items-center content-center gap-10 m-3">
+	
 	<QRScanner {successCallback} />
 	<button on:click={toggleScanner} class="bg-pink-500 rounded-md p-3 text-white">
 		{$scannerActive ? 'Stop Scanning' : 'Start Scanning'}
@@ -93,6 +150,7 @@
 				</div>
 			</div>
 		{/if}
+		
 		<div class="m-3 pl-10">
 			<label for="email" class="text-lg font-semibold">Enter Email:</label>
 			<div class="flex gap-2">
@@ -108,4 +166,5 @@
 			</div>
 		</div>
 	</div>
+</div>
 </div>
