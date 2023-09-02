@@ -96,7 +96,7 @@
 			// to select a particular event.
 			const apiURL = `${$API_URL}/events/${selectedEventId}/attendance/qr`;
 			const registerAttendeeDto = {
-				id: id
+				token: id
 			};
 
 			fetch(apiURL, {
@@ -132,7 +132,6 @@
         <option value={event._id}>{event.name}</option>
     {/each}
 </select>
-	<label></label>
 </div>
 <div class="flex flex-col md:flex-row items-center content-center gap-10 m-3">
 	
