@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { writable } from 'svelte/store';
 	import ScannedUser from '../lib/components/scanned-user.svelte';
+	import { slide } from 'svelte/transition';
 
 	let emailInput = '';
 	let netidInput = '';
@@ -53,6 +54,7 @@
 			const body = await response.json();
 			if (response.ok) {
 				lastScannedUser = body;
+				clearLastUser();
 				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser?.email];
 				messageToDisplay = '';
 				if (scannedEmails.length > 5) {
@@ -86,7 +88,10 @@
 			goto('/');
 		}
 
-		const eventsResponse = await fetch(`${$API_URL}/events`);
+		const eventsResponse = await fetch(`${$API_URL}/events`, {
+			credentials: 'include',
+			cache: 'no-cache'
+		});
 		if (eventsResponse.ok) {
 			const eventsData: EventData[] = await eventsResponse.json();
 			eventOptions.set(eventsData);
@@ -119,6 +124,7 @@
 			const body = await response.json();
 			if (response.ok) {
 				lastScannedUser = body;
+				clearLastUser();
 				last_scanned = decodedText;
 				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser.email];
 				messageToDisplay = '';
@@ -129,6 +135,10 @@
 				messageToDisplay = body.message;
 			}
 		}
+	};
+
+	const clearLastUser = () => {
+		setTimeout(() => (lastScannedUser = null), 3000);
 	};
 </script>
 
@@ -175,18 +185,20 @@
 			</div>
 
 			<div class="flex gap-2 mt-4">
-				<input
-					placeholder="Enter netid manually"
-					type="netid"
-					id="netid"
-					class="bg-transparent p-1 border border-gray-400 rounded-md h-fit w-full"
-					bind:value={netidInput}
-				/>
-				<div
-					class="bg-white bg-opacity-10 rounded-r-md py-1 border border-l-0 p-1 border-gray-400 pl-1 pr-2 w-fit"
-				>
-					@illinois.edu
-				</div>
+				<span class="flex flex-row">
+					<input
+						placeholder="Enter NetID"
+						type="netid"
+						id="netid"
+						class="bg-transparent p-1 border border-gray-400 rounded-l-md h-fit w-full"
+						bind:value={netidInput}
+					/>
+					<div
+						class="bg-white bg-opacity-10 rounded-r-md py-1 border border-l-0 p-1 pr-2 border-gray-400 w-fit"
+					>
+						@illinois.edu
+					</div>
+				</span>
 				<button
 					class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white"
 					on:click={submitNetID}
@@ -199,7 +211,7 @@
 
 			<div class="flex gap-2 mt-4">
 				<input
-					placeholder="Enter email manually"
+					placeholder="Enter email"
 					type="email"
 					id="email"
 					class="bg-transparent p-1 border border-gray-400 rounded-md h-fit w-full"
@@ -218,26 +230,23 @@
 			<div>
 				{#if lastScannedUser}
 					<ScannedUser {...lastScannedUser} />
-					<br />
-					Last Scanned Emails:
-					<div class="email-box">
-						{#each scannedEmails as email (email)}
-							<div>{email}</div>
-						{/each}
-					</div>
 				{/if}
 			</div>
+			{#if scannedEmails.length > 0}
+				<div class="flex flex-col mt-4 mb-2" in:slide>
+					<h1 class="text-lg font-serif font-bold">Last Scanned Emails</h1>
+					<ul class="p-1 flex flex-col gap-1">
+						{#each scannedEmails as email (email)}
+							<li>{email}</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>
 
 <style>
-	.email-box {
-		border: 2px solid #ccc; /* Border style and color */
-		padding: 10px; /* Padding inside the box */
-		border-radius: 8px; /* Rounded corners */
-	}
-
 	.error-message {
 		color: red;
 	}
