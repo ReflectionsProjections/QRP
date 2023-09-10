@@ -6,9 +6,12 @@
 	import { goto } from '$app/navigation';
 	import { writable } from 'svelte/store';
 	import ScannedUser from '../lib/components/scanned-user.svelte';
+	import { slide } from 'svelte/transition';
 
 	let emailInput = '';
-	const scannedEmails = [];
+	let netidInput = '';
+	let messageToDisplay = '';
+	let scannedEmails: string[] = [];
 	let selectedEventId = 0;
 	const eventOptions = writable<EventData[]>([]);
 
@@ -25,8 +28,17 @@
 
 	let lastScannedUser: User | null = null;
 
+	const submitNetID = async () => {
+		submitForm(netidInput, true);
+	};
+
 	const submitEmail = async () => {
+		submitForm(emailInput, false);
+	};
+
+	const submitForm = async (input: string, isNetID: boolean) => {
 		if (selectedEventId) {
+			let emailInput = isNetID ? input + '@illinois.edu' : input;
 			const apiURL = `${$API_URL}/events/${selectedEventId}/attendee/email`;
 			const requestBody = {
 				email: emailInput
@@ -42,12 +54,22 @@
 			const body = await response.json();
 			if (response.ok) {
 				lastScannedUser = body;
+				clearLastUser();
+				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser?.email];
+				messageToDisplay = '';
+				if (scannedEmails.length > 5) {
+					scannedEmails.shift();
+				}
+				if (isNetID) {
+					netidInput = '';
+				} else {
+					emailInput = '';
+				}
 			} else {
-				console.error(body.message);
-				console.error(response.status, response.statusText);
+				messageToDisplay = body.message;
 			}
 		} else {
-			console.log('Please select an event before submitting the email.');
+			messageToDisplay = 'Please select an event before submitting the email.';
 		}
 	};
 
@@ -57,23 +79,23 @@
 			cache: 'no-cache'
 		});
 		if (!response.ok) {
-			console.error(response.status, response.body);
 			throw new Error('Something went wrong!');
 		}
 
 		if (response.status === 401) {
-			console.log('Unauthorized. Redirecting to login page...');
 			window.location.href = 'https://reflectionsprojections.org/login';
 		} else {
 			goto('/');
 		}
 
-		const eventsResponse = await fetch(`${$API_URL}/events`);
+		const eventsResponse = await fetch(`${$API_URL}/events`, {
+			credentials: 'include',
+			cache: 'no-cache'
+		});
 		if (eventsResponse.ok) {
 			const eventsData: EventData[] = await eventsResponse.json();
 			eventOptions.set(eventsData);
 		} else {
-			console.error(eventsResponse.status, eventsResponse.body);
 			throw new Error('Failed to fetch events.');
 		}
 	});
@@ -85,22 +107,8 @@
 	let last_scanned: string | null = null;
 
 	const successCallback = async (decodedText: string) => {
-		// == PLEASE READ ==
-		// It CANNOT be decrypted client-side (in QRP), only in rp-core!
-		// Currently looked into this and found our that the rp-core endpoint currently does not support this.
-		// Will add the following endpoints:
-		// PUT /events/:eventId/attendee/email
-		//    --> body: { email: "attendee@email.com" }
-		// PUT /events/:eventId/attendance/qr
-		//    --> body: { token: decodedText }
-		console.log(decodedText);
 		if (last_scanned != decodedText) {
-			console.log('decoded id:' + decodedText);
 			const id = decodedText;
-			// == PLEASE READ ==
-			// Note: This fetch call is wrong because the id refers to event id.
-			// You'l need to fetch a list of events from GET /events and add a dropdown selector in QRP
-			// to select a particular event.
 			const apiURL = `${$API_URL}/events/${selectedEventId}/attendance/qr`;
 			const registerAttendeeDto = {
 				token: id
@@ -116,12 +124,21 @@
 			const body = await response.json();
 			if (response.ok) {
 				lastScannedUser = body;
+				clearLastUser();
 				last_scanned = decodedText;
+				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser.email];
+				messageToDisplay = '';
+				if (scannedEmails.length > 5) {
+					scannedEmails.shift();
+				}
 			} else {
-				console.error(body.message);
-				console.error(response.status, response.statusText);
+				messageToDisplay = body.message;
 			}
 		}
+	};
+
+	const clearLastUser = () => {
+		setTimeout(() => (lastScannedUser = null), 3000);
 	};
 </script>
 
@@ -133,7 +150,12 @@
 
 		<div class="flex flex-col">
 			<div class="flex flex-col md:flex-row gap-3 items-center">
-				<button on:click={toggleScanner} class="bg-pink-500 rounded-md p-3 text-white">
+				<button
+					on:click={toggleScanner}
+					class="bg-pink-500 rounded-md p-3 text-white"
+					disabled={selectedEventId == 0}
+					class:disabled-button={selectedEventId == 0}
+				>
 					{$scannerActive ? 'Stop Scanning' : 'Start Scanning'}
 				</button>
 				<div class="m-3 flex flex-col">
@@ -144,7 +166,7 @@
 						bind:value={selectedEventId}
 					>
 						<!-- Bind selectedEventId to the dropdown value -->
-						<option value="" selected>Select</option>
+						<option value={0} selected>Select</option>
 						<!-- Initial text "Select" -->
 						{#each $eventOptions as event (event._id)}
 							<option value={event._id}>{event.name}</option>
@@ -152,23 +174,87 @@
 					</select>
 				</div>
 			</div>
+			<div class="flex gap-2 mt-4">
+				<div class="error-message">{messageToDisplay}</div>
+			</div>
+
+			<div>
+				{#if (emailInput != '' && selectedEventId == 0) || (netidInput != '' && selectedEventId == 0) || (!scannerActive && selectedEventId == 0)}
+					<div class="error-message">Please select an event before submitting the email.</div>
+				{/if}
+			</div>
 
 			<div class="flex gap-2 mt-4">
-				<input
-					placeholder="Enter email manually"
-					type="email"
-					id="email"
-					class="border border-gray-300 p-2 rounded-md shadow-md"
-					bind:value={emailInput}
-				/>
-				<button class="bg-pink-500 rounded-md p-3 text-white" on:click={submitEmail}>
+				<span class="flex flex-row">
+					<input
+						placeholder="Enter NetID"
+						type="netid"
+						id="netid"
+						class="bg-transparent p-1 border border-gray-400 rounded-l-md h-fit w-full"
+						bind:value={netidInput}
+					/>
+					<div
+						class="bg-white bg-opacity-10 rounded-r-md py-1 border border-l-0 p-1 pr-2 border-gray-400 w-fit"
+					>
+						@illinois.edu
+					</div>
+				</span>
+				<button
+					class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white"
+					on:click={submitNetID}
+					disabled={selectedEventId == 0}
+					class:disabled-button={selectedEventId == 0}
+				>
 					Submit
 				</button>
 			</div>
 
-			{#if lastScannedUser}
-				<ScannedUser {...lastScannedUser} />
+			<div class="flex gap-2 mt-4">
+				<input
+					placeholder="Enter email"
+					type="email"
+					id="email"
+					class="bg-transparent p-1 border border-gray-400 rounded-md h-fit w-full"
+					bind:value={emailInput}
+				/>
+				<button
+					class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white"
+					on:click={submitEmail}
+					disabled={selectedEventId == 0}
+					class:disabled-button={selectedEventId == 0}
+				>
+					Submit
+				</button>
+			</div>
+
+			<div>
+				{#if lastScannedUser}
+					<ScannedUser {...lastScannedUser} />
+				{/if}
+			</div>
+			{#if scannedEmails.length > 0}
+				<div class="flex flex-col mt-4 mb-2" in:slide>
+					<h1 class="text-lg font-serif font-bold">Last Scanned Emails</h1>
+					<ul class="p-1 flex flex-col gap-1">
+						{#each scannedEmails as email (email)}
+							<li>{email}</li>
+						{/each}
+					</ul>
+				</div>
 			{/if}
 		</div>
 	</div>
 </div>
+
+<style>
+	.error-message {
+		color: red;
+	}
+
+	.disabled-button {
+		background-color: #ff80ab; /* Pink color */
+		color: #fff; /* White text color */
+		opacity: 0.7; /* Reduce opacity to make it slightly grayed out */
+		cursor: not-allowed; /* Change cursor to "not-allowed" */
+	}
+</style>

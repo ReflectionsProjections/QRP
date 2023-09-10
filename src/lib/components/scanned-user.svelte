@@ -12,6 +12,7 @@
 		? 'bg-yellow-500'
 		: 'bg-green-600'} p-5 my-2 text-white rounded-full items-center"
 	in:fade
+	out:fade
 >
 	{#if priority}
 		<Icon icon="solar:star-bold" class="text-white text-2xl" />
