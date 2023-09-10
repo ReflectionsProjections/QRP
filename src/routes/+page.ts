@@ -13,3 +13,5 @@ export const load: PageLoad<void> = async ({ fetch }) => {
 		throw error(check.status, { message: check.statusText });
 	}
 };
+
+export const ssr = false;
