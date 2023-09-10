@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html5Qrcode } from 'html5-qrcode';
 	import { onMount } from 'svelte';
-	import { scannerActive } from '../stores';
+	import { scannerActive, scannerFrontFacing } from '../stores';
 
 	export let successCallback: Function;
 	let scanning = false;
@@ -28,7 +28,7 @@
 
 	const start = () => {
 		html5Qrcode.start(
-			{ facingMode: 'environment' },
+			{ facingMode: $scannerFrontFacing ? 'user' : 'environment' },
 			{
 				fps: 10,
 				qrbox: { width: 200, height: 200 }
@@ -54,6 +54,13 @@
 			stop();
 		}
 	});
+
+	scannerFrontFacing.subscribe(async () => {
+		if ($scannerActive) {
+			await stop();
+			start();
+		}
+	});
 </script>
 
-<reader id="reader" class="w-full md:w-5/6 lg:w-1/2 min-h-[250px] bg-black" />
+<reader id="reader" class="w-full md:w-5/6 lg:w-1/2 min-h-[250px] bg-gray-400" />

@@ -8,7 +8,6 @@ export const load: PageLoad<void> = async ({ fetch }) => {
 	const check = await fetch(`${url}/auth/access/admin`, {
 		credentials: 'include'
 	});
-
 	if (check.status == 403 || check.status == 401) {
 		throw error(check.status, { message: check.statusText });
 	}
