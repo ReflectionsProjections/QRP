@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { fade } from 'svelte/transition';
+	import { fade, slide } from 'svelte/transition';
 
 	export let email: string;
 	export let name: string;
@@ -11,8 +11,8 @@
 	class="flex flex-row gap-5 {priority
 		? 'bg-yellow-500'
 		: 'bg-green-600'} p-5 my-2 text-white rounded-full items-center"
-	in:fade
-	out:fade
+	in:slide
+	out:slide
 >
 	{#if priority}
 		<Icon icon="solar:star-bold" class="text-white text-2xl" />

@@ -150,6 +150,12 @@
 	<QRScanner {successCallback} />
 
 	<div class="flex flex-col">
+		<div>
+			{#if lastScannedUser}
+				<ScannedUser {...lastScannedUser} />
+			{/if}
+		</div>
+
 		<div class="flex flex-col md:flex-row gap-3 items-center">
 			<button
 				on:click={toggleScanner}
@@ -234,11 +240,6 @@
 			</button>
 		</div>
 
-		<div>
-			{#if lastScannedUser}
-				<ScannedUser {...lastScannedUser} />
-			{/if}
-		</div>
 		{#if scannedEmails.length > 0}
 			<div class="flex flex-col mt-4 mb-2" in:slide>
 				<h1 class="text-lg font-serif font-bold">Last Scanned Emails</h1>

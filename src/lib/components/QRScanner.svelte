@@ -63,4 +63,7 @@
 	});
 </script>
 
-<reader id="reader" class="w-full md:w-5/6 lg:w-1/2 min-h-[250px] bg-gray-400" />
+<reader
+	id="reader"
+	class="w-full md:w-5/6 lg:w-1/2 min-h-[250px] bg-pink-200 {!$scannerActive && 'animate-pulse'}"
+/>
