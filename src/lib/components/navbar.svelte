@@ -15,8 +15,8 @@
 		</a>
 
 		<div class="flex flex-row gap-3 items-center text-gray-900">
-			<div class="hidden md:flex">Welcome to R|P</div>
-			<a href="/preferences">
+			<div class="hidden md:flex">Welcome to QR|P</div>
+			<a href="https://reflectionsprojections.org/preferences">
 				<Icon
 					icon="fluent:person-28-filled"
 					class="text-xl md:text-3xl hover:text-pink-500 duration-200"

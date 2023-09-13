@@ -156,26 +156,28 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-col md:flex-row gap-3 items-center">
-			<button
-				on:click={toggleScanner}
-				class="bg-pink-500 rounded-md p-3 text-white disabled:bg-pink-800 disabled:cursor-not-allowed"
-				disabled={!selectedEventId}
-			>
-				{$scannerActive ? 'Stop Scanning' : 'Start Scanning'}
-			</button>
-			<button
-				on:click={toggleFrontFacing}
-				class="bg-rp-blue rounded-md p-3 text-white"
-				disabled={!$scannerActive}
-			>
-				{$scannerFrontFacing ? 'Switch to Rear Facing' : 'Switch to Front Facing'}
-			</button>
-			<div class="m-3 flex flex-col">
+		<div class="flex flex-col gap-3 items-center md:items-start">
+			<div class="flex flex-col md:flex-row gap-3 items-center">
+				<button
+					on:click={toggleScanner}
+					class="bg-pink-500 rounded-md p-3 text-white disabled:bg-pink-800 disabled:cursor-not-allowed"
+					disabled={!selectedEventId}
+				>
+					{$scannerActive ? 'Stop Scanning' : 'Start Scanning'}
+				</button>
+				<button
+					on:click={toggleFrontFacing}
+					class="bg-rp-blue rounded-md p-3 text-white"
+					disabled={!$scannerActive}
+				>
+					{$scannerFrontFacing ? 'Switch to Rear Facing' : 'Switch to Front Facing'}
+				</button>
+			</div>
+			<div class="flex flex-col">
 				<label for="event" class="font-semibold">Select Event</label>
 				<select
 					id="event"
-					class="border border-gray-300 p-2 rounded-md shadow-md"
+					class="border border-gray-300 p-2 rounded-md shadow-md max-w-[20rem] md:max-w-sm"
 					bind:value={selectedEventId}
 				>
 					<!-- Bind selectedEventId to the dropdown value -->

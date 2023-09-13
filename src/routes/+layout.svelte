@@ -4,6 +4,6 @@
 </script>
 
 <Navbar />
-<main class="absolute top-20 w-screen">
+<main class="absolute top-20 md:w-screen">
 	<slot />
 </main>
