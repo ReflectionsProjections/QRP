@@ -628,6 +628,11 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
+howler@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.npmjs.org/howler/-/howler-2.2.3.tgz#a2eff9b08b586798e7a2ee17a602a90df28715da"
+  integrity sha512-QM0FFkw0LRX1PR8pNzJVAY25JhIWvbKMBFM4gqk+QdV+kPXOhleWGCB6AiAF/goGjIHK2e/nIElplvjQwhr0jg==
+
 html5-qrcode@^2.3.8:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/html5-qrcode/-/html5-qrcode-2.3.8.tgz#0b0cdf7a9926cfd4be530e13a51db47592adfa0d"
@@ -1124,6 +1129,13 @@ svelte-preprocess@^5.0.4:
     magic-string "^0.27.0"
     sorcery "^0.11.0"
     strip-indent "^3.0.0"
+
+svelte-sound@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.npmjs.org/svelte-sound/-/svelte-sound-0.6.0.tgz#a80390898850915aed11fe05ac3f478dd8bb4db4"
+  integrity sha512-n0JJwWwNEmsGntSN9oe57yevHrIg8Lw3tW2XsfdrDhJXwrbAAmLvbBJQ0Z3TFqONUW7+OWb5Yx04CSCo7q56fA==
+  dependencies:
+    howler "^2.2.3"
 
 svelte@^4.0.5:
   version "4.2.0"

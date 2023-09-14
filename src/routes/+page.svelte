@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Sound } from "svelte-sound";
+	import success_mp3 from "../success.mp3";
 	import QRScanner from '$lib/components/QRScanner.svelte';
 	import { scannerActive, scannerFrontFacing } from '$lib/stores';
 	import { onMount } from 'svelte';
@@ -7,6 +9,12 @@
 	import { writable } from 'svelte/store';
 	import ScannedUser from '../lib/components/scanned-user.svelte';
 	import { slide } from 'svelte/transition';
+
+	const click_sound = new Sound(success_mp3);
+	function playSound() {
+		console.log("hello!!!");
+		click_sound.play();
+	}
 
 	let emailInput = '';
 	let netidInput = '';
@@ -43,7 +51,6 @@
 			const requestBody = {
 				email: emailInput
 			};
-
 			const response = await fetch(apiURL, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
@@ -53,6 +60,7 @@
 
 			const body = await response.json();
 			if (response.ok) {
+				playSound();
 				lastScannedUser = body;
 				clearLastUser();
 				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser?.email];
@@ -135,6 +143,7 @@
 				if (scannedEmails.length > 5) {
 					scannedEmails.shift();
 				}
+				playSound();
 			} else {
 				messageToDisplay = body.message;
 			}
