@@ -82,6 +82,7 @@
 		});
 		if (eventsResponse.ok) {
 			const eventsData: EventData[] = await eventsResponse.json();
+			eventsData.sort((e1, e2) => (dayjs(e1.start_time).isBefore(e2.start_time) ? -1 : 1));
 			eventOptions.set(eventsData);
 		} else {
 			messageToDisplay = 'Failed to fetch events.';
@@ -156,7 +157,7 @@
 				</button>
 				<button
 					on:click={toggleFrontFacing}
-					class="bg-rp-blue rounded-md p-3 text-white"
+					class="bg-rp-blue rounded-md p-3 text-white disabled:bg-black disabled:cursor-not-allowed"
 					disabled={!$scannerActive}
 				>
 					{$scannerFrontFacing ? 'Switch to Rear Facing' : 'Switch to Front Facing'}
