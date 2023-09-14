@@ -19,7 +19,7 @@ export const load: PageLoad<void> = async ({ fetch }) => {
 	if (check?.status == 403 || check?.status == 401) {
 		throw redirect(
 			301,
-			env.PUBLIC_STAGE === 'production'
+			env.PUBLIC_STAGE === 'staging'
 				? 'https://beta.reflectionsprojections.org/login'
 				: 'https://reflectionsprojections.org/login'
 		);
