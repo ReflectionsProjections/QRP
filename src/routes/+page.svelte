@@ -2,14 +2,13 @@
 	import QRScanner from '$lib/components/QRScanner.svelte';
 	import { scannerActive, scannerFrontFacing } from '$lib/stores';
 	import { onMount } from 'svelte';
-	import { API_URL } from '../constants';
-	import { goto } from '$app/navigation';
 	import { writable } from 'svelte/store';
-	import ScannedUser from '../lib/components/scanned-user.svelte';
 	import { slide } from 'svelte/transition';
+	import { API_URL } from '../constants';
+	import ScannedUser from '../lib/components/scanned-user.svelte';
 
 	let emailInput = '';
-	let netidInput = '';
+	let netIdInput = '';
 	let messageToDisplay = '';
 	let scannedEmails: string[] = [];
 	let selectedEventId: string | null = null;
@@ -18,6 +17,9 @@
 	interface EventData {
 		_id: string;
 		name: string;
+		start_time: string;
+		upgrade: boolean;
+		downgrade: boolean;
 	}
 
 	interface User {
@@ -29,25 +31,19 @@
 
 	let lastScannedUser: User | null = null;
 	const submitNetID = async () => {
-		submitForm(netidInput, true);
+		submitForm(netIdInput + '@illinois.edu');
 	};
 
 	const submitEmail = async () => {
-		submitForm(emailInput, false);
+		submitForm(emailInput);
 	};
 
-	const submitForm = async (input: string, isNetID: boolean) => {
+	const submitForm = async (email: string) => {
 		if (selectedEventId) {
-			let emailInput = isNetID ? input + '@illinois.edu' : input;
-			const apiURL = `${$API_URL}/events/${selectedEventId}/attendee/email`;
-			const requestBody = {
-				email: emailInput
-			};
-
-			const response = await fetch(apiURL, {
+			const response = await fetch(`${$API_URL}/events/${selectedEventId}/attendee/email`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(requestBody),
+				body: JSON.stringify({ email }),
 				credentials: 'include'
 			});
 
@@ -55,17 +51,16 @@
 			if (response.ok) {
 				lastScannedUser = body;
 				clearLastUser();
+				vibrate(true);
 				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser?.email];
 				messageToDisplay = '';
 				if (scannedEmails.length > 5) {
 					scannedEmails.shift();
 				}
-				if (isNetID) {
-					netidInput = '';
-				} else {
-					emailInput = '';
-				}
+				netIdInput = '';
+				emailInput = '';
 			} else {
+				vibrate(false);
 				messageToDisplay = body.message;
 			}
 		} else {
@@ -74,20 +69,6 @@
 	};
 
 	onMount(async () => {
-		const response = await fetch(`${$API_URL}/auth/access/admin`, {
-			credentials: 'include',
-			cache: 'no-cache'
-		});
-		if (!response.ok) {
-			throw new Error('Something went wrong!');
-		}
-
-		if (response.status === 401) {
-			window.location.href = 'https://reflectionsprojections.org/login';
-		} else {
-			goto('/');
-		}
-
 		const eventsResponse = await fetch(`${$API_URL}/events`, {
 			credentials: 'include',
 			cache: 'no-cache'
@@ -96,7 +77,7 @@
 			const eventsData: EventData[] = await eventsResponse.json();
 			eventOptions.set(eventsData);
 		} else {
-			throw new Error('Failed to fetch events.');
+			messageToDisplay = 'Failed to fetch events.';
 		}
 	});
 
@@ -112,16 +93,10 @@
 
 	const successCallback = async (decodedText: string) => {
 		if (last_scanned != decodedText) {
-			const id = decodedText;
-			const apiURL = `${$API_URL}/events/${selectedEventId}/attendance/qr`;
-			const registerAttendeeDto = {
-				token: id
-			};
-
-			const response = await fetch(apiURL, {
+			const response = await fetch(`${$API_URL}/events/${selectedEventId}/attendance/qr`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(registerAttendeeDto),
+				body: JSON.stringify({ token: decodedText }),
 				credentials: 'include'
 			});
 
@@ -129,6 +104,7 @@
 			if (response.ok) {
 				lastScannedUser = body;
 				clearLastUser();
+				vibrate(true);
 				last_scanned = decodedText;
 				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser.email];
 				messageToDisplay = '';
@@ -136,6 +112,7 @@
 					scannedEmails.shift();
 				}
 			} else {
+				vibrate(false);
 				messageToDisplay = body.message;
 			}
 		}
@@ -143,6 +120,10 @@
 
 	const clearLastUser = () => {
 		setTimeout(() => (lastScannedUser = null), 3000);
+	};
+
+	const vibrate = (success: boolean) => {
+		navigator.vibrate(success ? [300] : [200, 100, 200]);
 	};
 </script>
 
@@ -180,22 +161,20 @@
 					class="border border-gray-300 p-2 rounded-md shadow-md max-w-[20rem] md:max-w-sm"
 					bind:value={selectedEventId}
 				>
-					<!-- Bind selectedEventId to the dropdown value -->
 					<option value={0} selected>Select</option>
-					<!-- Initial text "Select" -->
 					{#each $eventOptions as event (event._id)}
-						<option value={event._id}>{event.name}</option>
+						<option value={event._id}>{event.name} on {}</option>
 					{/each}
 				</select>
 			</div>
 		</div>
 		<div class="flex gap-2 mt-4">
-			<div class="error-message">{messageToDisplay}</div>
+			<div class="text-red-500">{messageToDisplay}</div>
 		</div>
 
 		<div>
-			{#if (emailInput != '' && !selectedEventId) || (netidInput != '' && !selectedEventId) || (!scannerActive && !selectedEventId)}
-				<div class="error-message">Please select an event before submitting the email.</div>
+			{#if (emailInput != '' && !selectedEventId) || (netIdInput != '' && !selectedEventId) || (!scannerActive && !selectedEventId)}
+				<div class="text-red-500">Please select an event before submitting the email.</div>
 			{/if}
 		</div>
 
@@ -206,19 +185,16 @@
 					type="netid"
 					id="netid"
 					class="bg-transparent p-1 border border-gray-400 rounded-l-md h-fit w-full"
-					bind:value={netidInput}
+					bind:value={netIdInput}
 				/>
-				<div
-					class="bg-white bg-opacity-10 rounded-r-md py-1 border border-l-0 p-1 pr-2 border-gray-400 w-fit"
-				>
+				<div class="bg-transparent rounded-r-md border border-l-0 p-1 pr-2 border-gray-400 w-fit">
 					@illinois.edu
 				</div>
 			</span>
 			<button
-				class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white"
+				class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white disabled:bg-pink-800 disabled:cursor-not-allowed"
 				on:click={submitNetID}
 				disabled={!selectedEventId}
-				class:disabled-button={!selectedEventId}
 			>
 				Submit
 			</button>
@@ -233,10 +209,9 @@
 				bind:value={emailInput}
 			/>
 			<button
-				class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white"
+				class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white disabled:bg-pink-800 disabled:cursor-not-allowed"
 				on:click={submitEmail}
 				disabled={!selectedEventId}
-				class:disabled-button={!selectedEventId}
 			>
 				Submit
 			</button>
@@ -254,16 +229,3 @@
 		{/if}
 	</div>
 </div>
-
-<style>
-	.error-message {
-		color: red;
-	}
-
-	.disabled-button {
-		background-color: #ff80ab; /* Pink color */
-		color: #fff; /* White text color */
-		opacity: 0.7; /* Reduce opacity to make it slightly grayed out */
-		cursor: not-allowed; /* Change cursor to "not-allowed" */
-	}
-</style>
