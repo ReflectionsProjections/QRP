@@ -24,10 +24,10 @@
 		email: string;
 		name: string;
 		priority: boolean;
+		prior_check_in: boolean;
 	}
 
 	let lastScannedUser: User | null = null;
-
 	const submitNetID = async () => {
 		submitForm(netidInput, true);
 	};
@@ -150,11 +150,11 @@
 	<QRScanner {successCallback} />
 
 	<div class="flex flex-col">
-		<div>
+		{#key lastScannedUser}
 			{#if lastScannedUser}
 				<ScannedUser {...lastScannedUser} />
 			{/if}
-		</div>
+		{/key}
 
 		<div class="flex flex-col gap-3 items-center md:items-start">
 			<div class="flex flex-col md:flex-row gap-3 items-center">
