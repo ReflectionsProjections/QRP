@@ -5,13 +5,20 @@
 	import { writable } from 'svelte/store';
 	import { slide } from 'svelte/transition';
 	import { API_URL } from '../constants';
+	import dayjs from 'dayjs';
+	import timezone from 'dayjs/plugin/timezone';
+	import utc from 'dayjs/plugin/utc';
+	dayjs.extend(utc);
+	dayjs.extend(timezone);
+	dayjs.tz.setDefault('America/Chicago');
 	import ScannedUser from '../lib/components/scanned-user.svelte';
+	import Icon from '@iconify/svelte';
 
 	let emailInput = '';
 	let netIdInput = '';
 	let messageToDisplay = '';
 	let scannedEmails: string[] = [];
-	let selectedEventId: string | null = null;
+	let selectedEvent: EventData | null = null;
 	const eventOptions = writable<EventData[]>([]);
 
 	interface EventData {
@@ -39,8 +46,8 @@
 	};
 
 	const submitForm = async (email: string) => {
-		if (selectedEventId) {
-			const response = await fetch(`${$API_URL}/events/${selectedEventId}/attendee/email`, {
+		if (selectedEvent) {
+			const response = await fetch(`${$API_URL}/events/${selectedEvent._id}/attendee/email`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email }),
@@ -92,29 +99,30 @@
 	let last_scanned: string | null = null;
 
 	const successCallback = async (decodedText: string) => {
-		if (last_scanned != decodedText) {
-			const response = await fetch(`${$API_URL}/events/${selectedEventId}/attendance/qr`, {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ token: decodedText }),
-				credentials: 'include'
-			});
+		if (!selectedEvent || last_scanned == decodedText) {
+			return;
+		}
+		const response = await fetch(`${$API_URL}/events/${selectedEvent._id}/attendance/qr`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ token: decodedText }),
+			credentials: 'include'
+		});
 
-			const body = await response.json();
-			if (response.ok) {
-				lastScannedUser = body;
-				clearLastUser();
-				vibrate(true);
-				last_scanned = decodedText;
-				if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser.email];
-				messageToDisplay = '';
-				if (scannedEmails.length > 5) {
-					scannedEmails.shift();
-				}
-			} else {
-				vibrate(false);
-				messageToDisplay = body.message;
+		const body = await response.json();
+		if (response.ok) {
+			lastScannedUser = body;
+			clearLastUser();
+			vibrate(true);
+			last_scanned = decodedText;
+			if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser.email];
+			messageToDisplay = '';
+			if (scannedEmails.length > 5) {
+				scannedEmails.shift();
 			}
+		} else {
+			vibrate(false);
+			messageToDisplay = body.message;
 		}
 	};
 
@@ -142,7 +150,7 @@
 				<button
 					on:click={toggleScanner}
 					class="bg-pink-500 rounded-md p-3 text-white disabled:bg-pink-800 disabled:cursor-not-allowed"
-					disabled={!selectedEventId}
+					disabled={!selectedEvent}
 				>
 					{$scannerActive ? 'Stop Scanning' : 'Start Scanning'}
 				</button>
@@ -156,16 +164,41 @@
 			</div>
 			<div class="flex flex-col">
 				<label for="event" class="font-semibold">Select Event</label>
-				<select
-					id="event"
-					class="border border-gray-300 p-2 rounded-md shadow-md max-w-[20rem] md:max-w-sm"
-					bind:value={selectedEventId}
-				>
-					<option value={0} selected>Select</option>
-					{#each $eventOptions as event (event._id)}
-						<option value={event._id}>{event.name} on {}</option>
-					{/each}
-				</select>
+				<span class="flex flex-row items-center">
+					{#if selectedEvent?.upgrade}
+						<Icon
+							icon="mdi:arrow-up-bold"
+							class="text-2xl mx-auto text-green-500"
+							title="upgrades"
+						/>
+					{:else if selectedEvent?.downgrade}
+						<Icon
+							icon="mdi:arrow-down-bold"
+							class="text-2xl mx-auto text-orange-500"
+							title="downgrades"
+						/>
+					{:else}
+						<Icon
+							icon="radix-icons:dash"
+							class="text-2xl mx-auto text-gray-800"
+							title="no change"
+						/>
+					{/if}
+					<select
+						id="event"
+						class="border border-gray-300 p-2 rounded-md shadow-md max-w-[20rem] md:max-w-sm"
+						bind:value={selectedEvent}
+					>
+						<option value={null} selected>Select</option>
+						{#each $eventOptions as event (event._id)}
+							<option value={event}>
+								{event.name}
+								on
+								{dayjs(event.start_time).format('ddd M/D h:mm A')}
+							</option>
+						{/each}
+					</select>
+				</span>
 			</div>
 		</div>
 		<div class="flex gap-2 mt-4">
@@ -173,7 +206,7 @@
 		</div>
 
 		<div>
-			{#if (emailInput != '' && !selectedEventId) || (netIdInput != '' && !selectedEventId) || (!scannerActive && !selectedEventId)}
+			{#if (emailInput != '' && !selectedEvent) || (netIdInput != '' && !selectedEvent) || (!scannerActive && !selectedEvent)}
 				<div class="text-red-500">Please select an event before submitting the email.</div>
 			{/if}
 		</div>
@@ -194,7 +227,7 @@
 			<button
 				class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white disabled:bg-pink-800 disabled:cursor-not-allowed"
 				on:click={submitNetID}
-				disabled={!selectedEventId}
+				disabled={!selectedEvent}
 			>
 				Submit
 			</button>
@@ -211,7 +244,7 @@
 			<button
 				class="bg-pink-500 rounded-md p-1 pl-3 pr-3 text-white disabled:bg-pink-800 disabled:cursor-not-allowed"
 				on:click={submitEmail}
-				disabled={!selectedEventId}
+				disabled={!selectedEvent}
 			>
 				Submit
 			</button>
