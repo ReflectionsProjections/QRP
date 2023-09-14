@@ -135,6 +135,7 @@
 
 			const body = await response.json();
 			if (response.ok) {
+				playSound();
 				lastScannedUser = body;
 				clearLastUser();
 				last_scanned = decodedText;
@@ -143,7 +144,6 @@
 				if (scannedEmails.length > 5) {
 					scannedEmails.shift();
 				}
-				playSound();
 			} else {
 				messageToDisplay = body.message;
 			}
