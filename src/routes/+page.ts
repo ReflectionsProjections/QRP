@@ -25,3 +25,5 @@ export const load: PageLoad<void> = async ({ fetch }) => {
 		);
 	}
 };
+
+export const ssr = false;
