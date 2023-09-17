@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Sound } from "svelte-sound";
+	import success_mp3 from "../success.mp3";
 	import QRScanner from '$lib/components/QRScanner.svelte';
 	import { scannerActive, scannerFrontFacing } from '$lib/stores';
 	import { onMount } from 'svelte';
@@ -13,6 +15,11 @@
 	dayjs.tz.setDefault('America/Chicago');
 	import ScannedUser from '../lib/components/scanned-user.svelte';
 	import Icon from '@iconify/svelte';
+
+	const click_sound = new Sound(success_mp3);
+	function playSound() {
+		click_sound.play();
+	}
 
 	let emailInput = '';
 	let netIdInput = '';
@@ -56,6 +63,7 @@
 
 			const body = await response.json();
 			if (response.ok) {
+				playSound();
 				lastScannedUser = body;
 				clearLastUser();
 				vibrate(true);
@@ -113,6 +121,7 @@
 		const body = await response.json();
 		if (response.ok) {
 			lastScannedUser = body;
+      playSound();
 			clearLastUser();
 			vibrate(true);
 			last_scanned = decodedText;
