@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	import { fade, slide } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 
 	export let email: string;
 	export let name: string;
 	export let priority: boolean;
+	export let prior_check_in: boolean;
 </script>
 
 <div
@@ -20,7 +21,7 @@
 		<Icon icon="simple-line-icons:check" class="text-white text-2xl" />
 	{/if}
 	<div class="flex flex-col gap-1">
-		<p>{name}</p>
+		<p>{name} {prior_check_in ? '[Checked In Previously]' : ''}</p>
 		<p class="text-sm">{email}</p>
 	</div>
 </div>
