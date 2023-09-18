@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Sound } from "svelte-sound";
-	import success_mp3 from "../success.mp3";
+	import { Sound } from 'svelte-sound';
+	import success_mp3 from '../success.mp3';
 	import QRScanner from '$lib/components/QRScanner.svelte';
 	import { scannerActive, scannerFrontFacing } from '$lib/stores';
 	import { onMount } from 'svelte';
@@ -111,6 +111,8 @@
 		if (!selectedEvent || last_scanned == decodedText) {
 			return;
 		}
+		last_scanned = decodedText;
+
 		const response = await fetch(`${$API_URL}/events/${selectedEvent._id}/attendance/qr`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -121,10 +123,9 @@
 		const body = await response.json();
 		if (response.ok) {
 			lastScannedUser = body;
-      playSound();
+			playSound();
 			clearLastUser();
 			vibrate(true);
-			last_scanned = decodedText;
 			if (lastScannedUser) scannedEmails = [...scannedEmails, lastScannedUser.email];
 			messageToDisplay = '';
 			if (scannedEmails.length > 5) {
