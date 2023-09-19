@@ -9,9 +9,12 @@
 </script>
 
 <div
-	class="flex flex-row gap-5 {priority
+	class="flex flex-row gap-5
+		p-5 my-2 text-white rounded-full items-center {prior_check_in
+		? 'bg-red-500'
+		: priority
 		? 'bg-yellow-500'
-		: 'bg-green-600'} p-5 my-2 text-white rounded-full items-center"
+		: 'bg-green-600'} "
 	in:slide
 	out:slide
 >
